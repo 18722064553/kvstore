@@ -35,8 +35,8 @@ void exit_kvengine(void);
 void kvstore_request(struct conn_item *item);
 int kvstore_parser_protocol(struct conn_item *item, char **tokens, int count);
 
-#define ENABLE_ARRAY_KVENGINE	    1
-#define ENABLE_RBTREE_KVENGINE		0
+#define ENABLE_ARRAY_KVENGINE	    0
+#define ENABLE_RBTREE_KVENGINE		1
 #define ENABLE_HASH_KVENGINE	    0
 
 #if ENABLE_ARRAY_KVENGINE
@@ -54,6 +54,7 @@ int array_count(array_t *arr);
 
 #endif
 
+
 #if ENABLE_RBTREE_KVENGINE
 
 typedef struct rbtree_s retree_t;
@@ -68,6 +69,7 @@ int rbtree_modify(retree_t *tree, char *key, char *value);
 int rbtree_count(retree_t *tree);
 
 #endif
+
 
 #if ENABLE_HASH_KVENGINE
 

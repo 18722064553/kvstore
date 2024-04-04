@@ -12,6 +12,9 @@ typedef struct array_s{
 	int array_idx;
 }array_t;
 
+array_t Array;
+
+
 int array_create(array_t * arr){
 	if(!arr) return -1;
 	arr->array_table = kvstore_malloc(ARRAY_SIZE * sizeof(struct array_item));

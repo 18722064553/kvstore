@@ -10,24 +10,22 @@ int kvstore_array_modify(char *key, char *value);
 int kvstore_array_count(void);
 #endif
 
+
 #if ENABLE_RBTREE_KVENGINE
-int kvstore_rbtree_create(retree_t *tree);
-void kvstore_rbtree_destory(retree_t *tree);
-int kvstore_rbtree_set(retree_t *tree, char *key, char *value);
-char *kvstore_rbtree_get(retree_t *tree, char *key);
-int kvstore_rbtree_delete(retree_t *tree, char *key);
-int kvstore_rbtree_modify(retree_t *tree, char *key, char *value);
-int kvstore_rbtree_count(retree_t *tree);
+int kvstore_rbtree_set(char *key, char *value);
+char* kvstore_rbtree_get(char *key);
+int kvstore_rbtree_delete(char *key);
+int kvstore_rbtree_modify(char *key, char *value);
+int kvstore_rbtree_count(void);
 #endif
 
+
 #if ENABLE_HASH_KVENGINE
-int kvstore_hash_create(hashtable_t *hash);
-void kvstore_hash_destory(hashtable_t *hash);
-int kvstore_hash_set(hashtable_t *hash, char *key, char *value);
-char *kvstore_hash_get(hashtable_t *hash, char *key);
-int kvstore_hash_delete(hashtable_t *hash, char *key);
-int kvstore_hash_modify(hashtable_t *hash, char *key, char *value);
-int kvstore_hash_count(hashtable_t *hash);
+int kvstore_hash_set(char *key, char *value);
+char *kvstore_hash_get(char *key);
+int kvstore_hash_delete(char *key);
+int kvstore_hash_modify(char *key, char *value);
+int kvstore_hash_count(void);
 #endif
 
 const char *commands[] = {
@@ -44,11 +42,13 @@ enum {
 	KVS_CMD_MOD,
 	KVS_CMD_COUNT,
 
+	
 	KVS_CMD_RSET,
 	KVS_CMD_RGET,
 	KVS_CMD_RDEL,
 	KVS_CMD_RMOD,
 	KVS_CMD_RCOUNT,
+	
 
 	KVS_CMD_HSET,
 	KVS_CMD_HGET,
@@ -87,94 +87,121 @@ int kvstore_parser_protocol(struct conn_item *item, char **tokens, int count){
 	memset(msg, 0, BUFFER_LENGTH);
 
 	switch (cmd) {
-		// array
-		case KVS_CMD_SET: 
+// array
+#if ENABLE_ARRAY_KVENGINE
+		case KVS_CMD_SET: {
 			int res = kvstore_array_set(key, value);
 			if (!res) snprintf(msg, BUFFER_LENGTH, "SUCCESS");
             else snprintf(msg, BUFFER_LENGTH, "FAILED");
 			break;
-		case KVS_CMD_GET: 
+		}
+		case KVS_CMD_GET: {
 			char *val = kvstore_array_get(key);
 			if (val) snprintf(msg, BUFFER_LENGTH, "%s", val);
             else snprintf(msg, BUFFER_LENGTH, "NO EXIST");
 			break;
-		case KVS_CMD_DEL: 
+		}	
+		case KVS_CMD_DEL: {
 			int res = kvstore_array_delete(key);
 			if (res < 0) snprintf(msg, BUFFER_LENGTH, "%s", "ERROR");
             else if (res == 0) snprintf(msg, BUFFER_LENGTH, "%s", "SUCCESS");
             else snprintf(msg, BUFFER_LENGTH, "NO EXIST");
 			break;
-		case KVS_CMD_MOD: 
+		}
+		case KVS_CMD_MOD: {
 			int res = kvstore_array_modify(key, value);
 			if (res < 0)  snprintf(msg, BUFFER_LENGTH, "%s", "ERROR");
 			 
             else if (res == 0) snprintf(msg, BUFFER_LENGTH, "%s", "SUCCESS");
             else snprintf(msg, BUFFER_LENGTH, "NO EXIST");
 			break;
-		case KVS_CMD_COUNT: 
+		}
+		case KVS_CMD_COUNT: {
 			int count = kvstore_array_count();
 			if (count < 0)   snprintf(msg, BUFFER_LENGTH, "%s", "ERROR");
             else snprintf(msg, BUFFER_LENGTH, "%d", count);
 			break;
-		// rbtree
-		case KVS_CMD_RSET: 
+		}
+#endif
+
+
+// rbtree
+#if ENABLE_RBTREE_KVENGINE
+		case KVS_CMD_RSET: {
 			int res = kvstore_rbtree_set(key, value);
 			if (!res) snprintf(msg, BUFFER_LENGTH, "SUCCESS"); 
             else snprintf(msg, BUFFER_LENGTH, "FAILED");
 			break;
-		case KVS_CMD_RGET: 
+	 	}	
+		case KVS_CMD_RGET: {
 			char *val = kvstore_rbtree_get(key);
 			if (val) snprintf(msg, BUFFER_LENGTH, "%s", val);
             else snprintf(msg, BUFFER_LENGTH, "NO EXIST");
 			break;
-		case KVS_CMD_RDEL: 
+		}
+		case KVS_CMD_RDEL: {
 			int res = kvstore_rbtree_delete(key);
 			if (res < 0)  snprintf(msg, BUFFER_LENGTH, "%s", "ERROR");
             else if (res == 0) snprintf(msg, BUFFER_LENGTH, "%s", "SUCCESS");
             else snprintf(msg, BUFFER_LENGTH, "NO EXIST");
 			break;
-		case KVS_CMD_RMOD: 
+		}
+		case KVS_CMD_RMOD: {
 			int res = kvstore_rbtree_modify(key, value);
 			if (res < 0) snprintf(msg, BUFFER_LENGTH, "%s", "ERROR");
             else if (res == 0) snprintf(msg, BUFFER_LENGTH, "%s", "SUCCESS");			 
             else snprintf(msg, BUFFER_LENGTH, "NO EXIST");
 			break;
-		case KVS_CMD_RCOUNT: 
+		}
+		case KVS_CMD_RCOUNT: {
 			int count = kvstore_rbtree_count();
 			if (count < 0) snprintf(msg, BUFFER_LENGTH, "%s", "ERROR");
             else snprintf(msg, BUFFER_LENGTH, "%d", count);
 			break;
-		case KVS_CMD_HSET: 
+		}
+#endif		
+
+// hash
+#if ENABLE_HASH_KVENGINE
+		case KVS_CMD_HSET:{ 
 			int res = kvstore_hash_set(key, value);
 			if (!res) snprintf(msg, BUFFER_LENGTH, "SUCCESS");
             else snprintf(msg, BUFFER_LENGTH, "FAILED");
 			break;
-		// hash
-		case KVS_CMD_HGET: 
+		}
+		
+		case KVS_CMD_HGET: {
 			char *val = kvstore_hash_get(key);
 			if (val) snprintf(msg, BUFFER_LENGTH, "%s", val);
             else snprintf(msg, BUFFER_LENGTH, "NO EXIST");			
 			break;
-		case KVS_CMD_HDEL: 
+		}
+		case KVS_CMD_HDEL: {
 			int res = kvstore_hash_delete(key);
 			if (res < 0)  snprintf(msg, BUFFER_LENGTH, "%s", "ERROR");
             else if (res == 0) snprintf(msg, BUFFER_LENGTH, "%s", "SUCCESS");
             else snprintf(msg, BUFFER_LENGTH, "NO EXIST");
 			break;
-		case KVS_CMD_HMOD: 
+		}
+		case KVS_CMD_HMOD: {
 			int res = kvstore_hash_modify(key, value);
 			if (res < 0)  snprintf(msg, BUFFER_LENGTH, "%s", "ERROR");	 
             else if (res == 0) snprintf(msg, BUFFER_LENGTH, "%s", "SUCCESS");
             else snprintf(msg, BUFFER_LENGTH, "NO EXIST");
 			break;
-		case KVS_CMD_HCOUNT: 
+		}
+		case KVS_CMD_HCOUNT:{ 
 			int count = kvstore_hash_count();
 			if (count < 0)   snprintf(msg, BUFFER_LENGTH, "%s", "ERROR");
             else snprintf(msg, BUFFER_LENGTH, "%d", count);
 			break;
-		default: 
+		}
+#endif
+
+		default: {
 			printf("cmd: %s\n", commands[cmd]);
 			assert(0);
+		}
 	}
 }
 

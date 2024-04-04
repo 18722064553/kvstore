@@ -26,6 +26,7 @@ int kvstore_array_count(void) {
 }
 #endif
 
+
 #if ENABLE_RBTREE_KVENGINE
 int kvstore_rbtree_set(char *key, char *value) {
 	return rbtree_set(&Tree, key, value);
@@ -45,6 +46,7 @@ int kvstore_rbtree_count(void) {
 #endif
 
 #if ENABLE_HASH_KVENGINE
+
 int kvstore_hash_set(char *key, char *value) {
 	return hash_set(&Hash, key, value);
 }
@@ -58,10 +60,9 @@ int kvstore_hash_modify(char *key, char *value) {
 	return hash_modify(&Hash, key, value);
 }
 int kvstore_hash_count(void) {
-	return kvs_hash_count(&Hash);
+	return hash_count(&Hash);
 }
 #endif
-
 
 
 void init_kvengine(void){
